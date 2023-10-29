@@ -1,1 +1,0 @@
-np.expand_dims(image,0)
