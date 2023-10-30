@@ -1,0 +1,158 @@
+<head>
+    <title>ML Model Prediction</title>
+    <style>
+        /* Styling for the entire page */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: yellow;
+            background-image: url("https://images.pexels.com/photos/96715/pexels-photo-96715.jpeg?auto=compress&cs=tinysrgb&w=600");
+            background-size: cover;
+            text-align: center;
+        }
+
+        /* Styling for the drop zone */
+        #dropZone {
+            
+            height: 300px;
+            width: 300px;
+            border: 2px dashed #34db69;
+            text-align: center;
+            padding: 20px;
+            cursor: pointer;
+            position: relative;
+            margin: 20px auto;
+            background-color:rgb(127, 255, 155);
+            border-radius: 10px;
+           
+            background-repeat: no-repeat;
+            background-size: 300px 530px;
+        }
+
+        #dropZone p {
+            font-size: 18px;
+            color: rgb(12, 11, 11);
+            margin: 10px 0;
+           
+        }
+
+        #selectedImage {
+            width: 340px;
+            height: 340px;
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #iconImage {
+            max-width: 80%;
+            max-height: 80%;
+            display: block;
+            margin: 10% auto;
+        }
+
+        /* Styling for the Predict button */
+        button {
+            background-color: #3498db;
+            color: #fff;
+            font-size: 16px;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px;
+        }
+
+        /* Styling for the prediction result */
+        #prediction {
+
+            font-size: 10px;
+            color: #333;
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- Create a drag-and-drop zone for selecting an image -->
+    <div id="dropZone">
+        <p>POTATO DISEASE PREDICTION</p>
+        <p>Drag &amp; Drop an Image or Click to Choose</p>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        <img id="selectedImage" src="" style="display: none;">
+       
+        <img src="static/icon.png" id="iconImage" >
+        <button>upload</button>
+    </div>
+
+    <button onclick="predict()">Predict</button>
+    <p id="prediction"></p>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const selectedImage = document.getElementById('selectedImage');
+        const iconImage = document.getElementById('iconImage');
+        const predictionElement = document.getElementById('prediction');
+
+        // Add event listeners to the drop zone
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.border = '2px dashed #333';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.border = '2px dashed #ccc';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.border = '2px dashed #ccc';
+            const file = e.dataTransfer.files[0];
+            fileInput.files = e.dataTransfer.files;
+            displayImage(file);
+        });
+
+        // Trigger file input when clicking on the drop zone
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', () => {
+            displayImage(fileInput.files[0]);
+        });
+
+        async function displayImage(file) {
+            if (file) {
+                const imageURL = URL.createObjectURL(file);
+                selectedImage.src = imageURL;
+                selectedImage.style.display = 'block';
+                iconImage.style.display = 'none';
+            }
+        }
+
+        async function predict() {
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            const response = await fetch('/predict/', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                predictionElement.textContent = `Class: ${data.class}, Confidence: ${(data.confidence.toFixed(2) * 100)} %`;
+            } else {
+                predictionElement.textContent = 'Error predicting.';
+            }
+        }
+    </script>
+
+
+
+
+
+
+
+
+</body>
